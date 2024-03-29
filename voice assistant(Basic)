@@ -1,0 +1,119 @@
+import pyttsx3 as p
+import speech_recognition as sr
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+import datetime
+import randfacts
+from joke import*
+
+engine = p.init()
+rate = engine.getProperty('rate')
+engine.setProperty('rate', 130)  # set speed
+voices = engine.getProperty('voices')
+engine.setProperty('voice', voices[1].id)  # set voice
+from weather import *
+def speak(text):
+    engine.say(text)
+    engine.runAndWait()
+
+r = sr.Recognizer()
+today_date=datetime.datetime.now()
+speak("Hello ritika ma'am ")
+speak("Temperature in Jalandhar is " + str(temp()) + "°C and the weather is " + str(des()))
+speak("Today is the "+ today_date.strftime("%d") + "th of " + today_date.strftime("%B") + " and the year is " + today_date.strftime("%Y"))
+speak(" how can I assist you?")
+
+      
+
+with sr.Microphone() as source:
+    r.adjust_for_ambient_noise(source)
+    print("Listening...")
+    audio = r.listen(source)
+    try:
+        text = r.recognize_google(audio)
+        print("You said:", text)
+    except sr.UnknownValueError:
+        print("Sorry, I didn't catch that. Could you please repeat?")
+        text = ""
+
+if "please" or "help" or "give" in text:
+    speak("sure")    
+
+while True:
+    class infow():
+        def __init__(self):
+            self.driver = webdriver.Firefox()
+
+        def get_info(self, query):
+            self.driver.get("https://www.wikipedia.org")
+            search = self.driver.find_element(by=By.XPATH, value='//*[@id="searchInput"]')
+            search.click()
+            search.send_keys(query)
+            enter = self.driver.find_element(by=By.XPATH, value='/html/body/main/div[2]/form/fieldset/button')
+            enter.click()
+
+        def music(self, query):
+            self.query=query
+            self.driver.get("https://www.youtube.com/results?search_query="+query)
+            video=self.driver.find_element(by=By.XPATH, value='/html/body/ytd-app/div[1]/ytd-page-manager/ytd-search/div[1]/ytd-two-column-search-results-renderer/div/ytd-section-list-renderer/div[2]/ytd-item-section-renderer/div[3]/ytd-video-renderer[1]/div[1]/div/div[1]/div/h3/a/yt-formatted-string')
+            video.click()
+    
+
+
+    with sr.Microphone() as source:
+        r.adjust_for_ambient_noise(source)
+        print("Listening...")
+        audio = r.listen(source)
+        try:
+            text2 = r.recognize_google(audio)
+            print("You said:", text2)
+        except sr.UnknownValueError:
+            print("Sorry, I didn't catch that. Could you please repeat?")
+            text2 = ""
+
+    if "information" in text2:
+        speak("What topic are you interested in?")
+        with sr.Microphone() as source:
+            r.adjust_for_ambient_noise(source)
+            print("Listening...")
+            audio = r.listen(source)
+            try:
+                info = r.recognize_google(audio)
+                print("You said:", info)
+            except sr.UnknownValueError:
+                print("Sorry, I didn't catch that. Could you please repeat?")
+                info = ""
+        speak("searching{}in wikipedia".format(info))
+        assist = infow()
+        assist.get_info(info)
+
+    elif "play" and "video" in text2:
+        speak("what you wnat me to play")
+        with sr.Microphone() as source:
+            r.adjust_for_ambient_noise(source)
+            print("Listening...")
+            audio = r.listen(source)
+            try:
+                v= r.recognize_google(audio)
+                print("You said:",v)
+            except sr.UnknownValueError:
+                print("Sorry, I didn't catch that. Could you please repeat?")
+                v= ""
+        speak("playing{}in youtube".format(v))
+        assist = infow()
+        assist.music(v)
+    elif "fact" or "facts" in text2:
+        speak("sure Ma'am")
+        x=randfacts.get_fact()
+        print(x)
+        speak("Did you know that "+x)
+    elif "joke" in text2:
+        speak("sure ma'a")
+        ar=joke()
+        print(ar[0])
+        speak(ar[0])
+        print(ar[1])
+        speak(ar[1])
+    else:
+        speak("ok by")
+        break
